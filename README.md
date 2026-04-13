@@ -2,8 +2,6 @@
 
 Interactive map showing all 40 CRY America project locations across India.
 
-**Live URL:** [https://rajkonka.github.io/cry-america-map/](https://rajkonka.github.io/cry-america-map/))
-
 ## Features
 - Zoomable India map with proper state borders (Leaflet + CartoDB tiles)
 - 40 project pins — click any for details and a link to the project page

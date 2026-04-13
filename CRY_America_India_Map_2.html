@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRY America — Project Locations Across India</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Calibri, Arial, sans-serif; background: #f5f5f0; }
+  
+  .header {
+    background: #1a1a1a;
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 4px solid #FFC107;
+  }
+  .header h1 {
+    color: #FFC107;
+    font-family: Georgia, serif;
+    font-size: 24px;
+    font-weight: 700;
+  }
+  .header .subtitle {
+    color: #aaa;
+    font-size: 13px;
+  }
+  .stats-bar {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-val {
+    color: #FFC107;
+    font-size: 20px;
+    font-weight: 700;
+    font-family: Georgia, serif;
+  }
+  .stat-label {
+    color: #888;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  #map {
+    width: 100%;
+    height: calc(100vh - 80px);
+  }
+
+  .custom-popup .leaflet-popup-content-wrapper {
+    border-radius: 10px;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: none;
+  }
+  .custom-popup .leaflet-popup-content {
+    margin: 0;
+    min-width: 240px;
+    max-width: 300px;
+  }
+  .custom-popup .leaflet-popup-tip {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+
+  .popup-header {
+    background: #1a1a1a;
+    padding: 12px 16px 10px;
+    border-bottom: 3px solid #FFC107;
+  }
+  .popup-name {
+    color: #FFC107;
+    font-family: Georgia, serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+  }
+  .popup-state {
+    color: #aaa;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+  .popup-body {
+    padding: 12px 16px 14px;
+    background: #fff;
+  }
+  .popup-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .popup-row:last-of-type {
+    border-bottom: none;
+  }
+  .popup-row-label {
+    color: #888;
+    font-size: 12px;
+  }
+  .popup-row-value {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1a1a1a;
+  }
+  .popup-row-value.raised {
+    color: #D85A30;
+  }
+  .popup-link {
+    display: block;
+    margin-top: 10px;
+    padding: 8px 14px;
+    background: #FFC107;
+    color: #1a1a1a;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .popup-link:hover {
+    background: #e6ad00;
+  }
+
+  .legend {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .legend-title {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: #1a1a1a;
+  }
+  .legend i {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>CRY America</h1>
+    <div class="subtitle">Project locations across India — 2026</div>
+  </div>
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-val">40</div>
+      <div class="stat-label">Projects</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">17</div>
+      <div class="stat-label">States</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">$830,990</div>
+      <div class="stat-label">Funding goal</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val">800,000+</div>
+      <div class="stat-label">Children impacted</div>
+    </div>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<script>
+const projects = [
+  {name:"Project VSS",state:"Madhya Pradesh",lat:23.25,lng:77.41,goal:62193,raised:0,url:"https://www.cryamerica.org/projects/vikas-samvad-samiti-vss-2025/"},
+  {name:"Project ASES",state:"Jharkhand (Jamshedpur)",lat:22.80,lng:86.18,goal:28577,raised:0,url:"https://www.cryamerica.org/projects/adarsh-seva-sansthan-ases-2023/"},
+  {name:"Project KAS",state:"Rajasthan",lat:25.10,lng:76.50,goal:31559,raised:0,url:"https://www.cryamerica.org/projects/kas-2025/"},
+  {name:"Project Pragathi",state:"Andhra Pradesh",lat:16.50,lng:80.64,goal:53204,raised:0,url:"https://www.cryamerica.org/projects/pragathi-2025/"},
+  {name:"Project Sikshasandhan",state:"Odisha",lat:20.94,lng:84.00,goal:26248,raised:0,url:"https://www.cryamerica.org/projects/sikshasandhan-2025/"},
+  {name:"Project CHARDS",state:"Bihar",lat:25.61,lng:85.00,goal:31385,raised:0,url:"https://www.cryamerica.org/projects/chards-2025/"},
+  {name:"Project EFFORT",state:"Telangana",lat:17.38,lng:78.49,goal:41517,raised:0,url:"https://www.cryamerica.org/projects/effort-2025/"},
+  {name:"Project VSS Baran",state:"Rajasthan (Baran)",lat:25.10,lng:76.51,goal:19274,raised:0,url:"https://www.cryamerica.org/projects/vss-baran-2025/"},
+  {name:"Project SSRF",state:"Uttar Pradesh",lat:26.85,lng:80.91,goal:42766,raised:0,url:"https://www.cryamerica.org/projects/ssrf-2025/"},
+  {name:"Project GVM",state:"Assam",lat:26.20,lng:92.94,goal:65936,raised:0,url:"https://www.cryamerica.org/projects/gvm-2025/"},
+  {name:"Project GSS",state:"Gujarat",lat:22.31,lng:71.74,goal:29129,raised:0,url:"https://www.cryamerica.org/projects/gss-2025/"},
+  {name:"Project MMKSS",state:"Rajasthan",lat:26.45,lng:73.33,goal:24280,raised:0,url:"https://www.cryamerica.org/projects/mmkss-2025/"},
+  {name:"Project SWATI",state:"Odisha",lat:21.49,lng:83.50,goal:31274,raised:0,url:"https://www.cryamerica.org/projects/social-welfare-agency-training-institute-swati-2022/"},
+  {name:"Project KMAGVS",state:"Maharashtra",lat:19.75,lng:75.71,goal:43056,raised:0,url:"https://www.cryamerica.org/projects/kmagvs-2025/"},
+  {name:"Project PORD",state:"Andhra Pradesh",lat:15.40,lng:78.49,goal:50390,raised:0,url:"https://www.cryamerica.org/projects/pord-2025/"},
+  {name:"Project Sanlaap",state:"West Bengal",lat:22.57,lng:88.36,goal:30666,raised:0,url:"https://www.cryamerica.org/projects/sanlaap-2025/"},
+  {name:"Project JJBVK",state:"Bihar",lat:25.99,lng:84.53,goal:40716,raised:0,url:"https://www.cryamerica.org/projects/jjbvk-2025/"},
+  {name:"Project RWDS",state:"Tamil Nadu",lat:10.79,lng:78.69,goal:63923,raised:0,url:"https://www.cryamerica.org/projects/rwds-2025/"},
+  {name:"Project SJJKS",state:"Rajasthan",lat:26.92,lng:74.79,goal:49898,raised:0,url:"https://www.cryamerica.org/projects/sjjks-2025/"},
+  {name:"Project DVEUS",state:"Uttar Pradesh",lat:27.18,lng:82.00,goal:64999,raised:0,url:"https://www.cryamerica.org/projects/dveus-2025/"},
+  {name:"Project AAS",state:"Madhya Pradesh (Indore)",lat:22.72,lng:75.86,goal:null,raised:null,url:"https://www.cryamerica.org/projects/aas-2025/"},
+  {name:"Project Jago Foundation",state:"Jharkhand",lat:23.61,lng:85.50,goal:null,raised:null,url:"https://www.cryamerica.org/projects/jago-foundation-2025/"},
+  {name:"Project NEEDS",state:"Manipur",lat:24.82,lng:93.95,goal:null,raised:null,url:"https://www.cryamerica.org/projects/needs-2025/"},
+  {name:"Project Synergy Sansthan",state:"Madhya Pradesh",lat:23.83,lng:79.50,goal:null,raised:null,url:"https://www.cryamerica.org/projects/synergy-sansthan-2025/"},
+  {name:"Project AIM",state:"Uttar Pradesh",lat:28.00,lng:79.50,goal:null,raised:null,url:"https://www.cryamerica.org/projects/aim-2025/"},
+  {name:"Project SSDC",state:"West Bengal",lat:23.02,lng:87.00,goal:null,raised:null,url:"https://www.cryamerica.org/projects/ssdc-2025/"},
+  {name:"Project SMVM",state:"Jharkhand",lat:23.33,lng:85.80,goal:null,raised:null,url:"https://www.cryamerica.org/projects/smvm-2025/"},
+  {name:"Project GMSSS",state:"Chhattisgarh",lat:21.27,lng:81.63,goal:null,raised:null,url:"https://www.cryamerica.org/projects/gram-mitra-samaj-sevi-sansthan-gmsss-2023/"},
+  {name:"Project SPREAD",state:"Odisha",lat:19.81,lng:85.31,goal:null,raised:null,url:"https://www.cryamerica.org/projects/spread-2025/"},
+  {name:"Project Vatsalya",state:"Madhya Pradesh",lat:23.47,lng:77.95,goal:null,raised:null,url:"https://www.cryamerica.org/projects/vatsalya-2025/"},
+  {name:"Project SRAMA",state:"Andhra Pradesh",lat:14.68,lng:79.00,goal:null,raised:null,url:"https://www.cryamerica.org/projects/srama-2025/"},
+  {name:"Project Wide Angle",state:"Manipur",lat:25.18,lng:94.10,goal:null,raised:null,url:"https://www.cryamerica.org/projects/wide-angle-2025/"},
+  {name:"Project SVS",state:"Uttar Pradesh",lat:26.45,lng:81.00,goal:null,raised:null,url:"https://www.cryamerica.org/projects/samagra-vikas-sansthan-svs-2025/"},
+  {name:"Project DEEP",state:"Bihar",lat:25.30,lng:86.00,goal:null,raised:null,url:"https://www.cryamerica.org/projects/deep-2025/"},
+  {name:"Project Narmada DI",state:"Gujarat / MP border",lat:21.83,lng:73.50,goal:null,raised:null,url:"https://www.cryamerica.org/projects/narmada-direct-intervention-2026/"},
+  {name:"Project AEET",state:"Tamil Nadu",lat:12.00,lng:79.69,goal:null,raised:null,url:"https://www.cryamerica.org/projects/aeet-2025/"},
+  {name:"Project Ranchi DI",state:"Jharkhand (Ranchi)",lat:23.34,lng:85.31,goal:null,raised:null,url:"https://www.cryamerica.org/projects/ranchi-direct-intervention-2025/"},
+  {name:"Project Kodaikanal DI",state:"Tamil Nadu (Kodaikanal)",lat:10.24,lng:77.49,goal:null,raised:null,url:"https://www.cryamerica.org/projects/kodaikanal-direct-intervention-2025/"},
+  {name:"Project Direct Implementation",state:"National",lat:28.61,lng:77.21,goal:null,raised:null,url:"https://www.cryamerica.org/projects/direct-implementation-2025/"},
+  {name:"Project CRY India",state:"National (Mumbai)",lat:19.08,lng:72.88,goal:null,raised:null,url:"https://www.cryamerica.org/projects/cry-india-2025/"},
+];
+
+// Initialize map
+const map = L.map('map', {
+  center: [22.5, 80.0],
+  zoom: 5,
+  minZoom: 4,
+  maxZoom: 15,
+  zoomControl: true
+});
+
+// Tile layer - CartoDB Voyager (clean, light, shows borders beautifully)
+L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/">CARTO</a>',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+// Custom marker icon
+const pinIcon = L.divIcon({
+  className: 'custom-pin',
+  html: `<svg width="28" height="38" viewBox="0 0 28 38" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="ds" x="-30%" y="-20%" width="160%" height="150%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.25"/>
+      </filter>
+    </defs>
+    <path d="M14 0 C6.27 0 0 6.27 0 14 C0 24.5 14 38 14 38 C14 38 28 24.5 28 14 C28 6.27 21.73 0 14 0Z" fill="#D85A30" filter="url(#ds)"/>
+    <circle cx="14" cy="13" r="5.5" fill="white"/>
+  </svg>`,
+  iconSize: [28, 38],
+  iconAnchor: [14, 38],
+  popupAnchor: [0, -38]
+});
+
+// Add markers
+projects.forEach(p => {
+  let popupHTML = `
+    <div class="popup-header">
+      <div class="popup-name">${p.name}</div>
+      <div class="popup-state">${p.state}</div>
+    </div>
+    <div class="popup-body">`;
+
+  if (p.goal !== null) {
+    const pct = p.goal > 0 ? Math.round((p.raised / p.goal) * 100) : 0;
+    popupHTML += `
+      <div class="popup-row">
+        <span class="popup-row-label">Funding goal</span>
+        <span class="popup-row-value">$${p.goal.toLocaleString()}</span>
+      </div>
+      <div class="popup-row">
+        <span class="popup-row-label">Funds raised</span>
+        <span class="popup-row-value raised">$${p.raised.toLocaleString()}</span>
+      </div>
+      <div style="margin-top:8px;background:#f0f0f0;border-radius:4px;height:6px;overflow:hidden;">
+        <div style="width:${Math.max(pct, 2)}%;height:100%;background:#D85A30;border-radius:4px;"></div>
+      </div>
+      <div style="text-align:right;font-size:11px;color:#888;margin-top:3px;">${pct}% funded</div>`;
+  }
+
+  popupHTML += `
+      <a class="popup-link" href="${p.url}" target="_blank">View project on CRY America &#8599;</a>
+    </div>`;
+
+  L.marker([p.lat, p.lng], {icon: pinIcon})
+    .addTo(map)
+    .bindPopup(popupHTML, {className: 'custom-popup', maxWidth: 300});
+});
+
+// Legend
+const legend = L.control({position: 'bottomleft'});
+legend.onAdd = function() {
+  const div = L.DomUtil.create('div', 'legend');
+  div.innerHTML = `
+    <div class="legend-title">CRY America Projects</div>
+    <div><i style="background:#D85A30"></i> Project location (40 total)</div>
+    <div style="margin-top:4px;color:#888;font-size:11px;">Click any pin for details &amp; link</div>
+  `;
+  return div;
+};
+legend.addTo(map);
+</script>
+
+</body>
+</html>
